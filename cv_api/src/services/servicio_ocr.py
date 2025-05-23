@@ -6,14 +6,10 @@ from dotenv import load_dotenv
 import os
 from openai import OpenAI
 
-def extraer_texto():
+def extraer_texto(img):
     pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
-    id_documento = 4
-    documento = doc.Documento.query.get(id_documento)
-    imagenes = documento.imagenes
-    ultima_imagen = imagenes[-1] if imagenes else None
-    if ultima_imagen:
-        ruta_imagen = ultima_imagen.url
+    if img:
+        ruta_imagen = img.url
         texto_extraido = pytesseract.image_to_string(Image.open(ruta_imagen), config='--psm 6 -l spa')
         return {
             'status': 'exito',
@@ -60,17 +56,29 @@ def texto_a_json(texto):
     )
     try:
         respuesta = get_completion(instruccion)
-        return respuesta
+        return {
+            'status': 'exito',
+            'json_convertido': respuesta,
+            'msg': 'Texto convertido a JSON exitosamente.'
+        }
     except Exception as e:
         return {
             'status': 'fracaso',
             'msg': f'Error al convertir el texto a JSON: {str(e)}'
         }
 
-def extraer_json():
-    texto = extraer_texto()['texto_extraido']
-    if texto:
-        return texto_a_json(texto)
+def extraer_json(img):
+    if not img:
+        return {
+            'status': 'fracaso',
+            'msg': 'No se encontraron imágenes para extraer texto.'
+        }
+        
+    resultado = extraer_texto(img)
+    if resultado['status'] == 'exito':
+        #print(resultado['texto_extraido'])
+        json = texto_a_json(resultado['texto_extraido'])['json_convertido']
+        return json
     else:
         return {
             'status': 'fracaso',
