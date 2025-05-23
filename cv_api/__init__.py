@@ -6,7 +6,8 @@ def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
         SECRET_KEY='dev',
-        SQLAlchemy_DATABASE_URI='sqlite:///' + os.path.join(app.instance_path, 'cv_api.sqlite'),
+        SQLALCHEMY_DATABASE_URI='sqlite:///' + os.path.join(app.instance_path, 'cv_api.sqlite'),
+        UPLOAD_FOLDER=app.instance_path + '/uploads/',
     )
 
     if test_config is None:
